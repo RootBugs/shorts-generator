@@ -17,58 +17,22 @@
 
 ## 📸 How It Works
 
+![Process Diagram](assets/screenshots/process.png)
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  INPUT: Any YouTube Video or Local File                         │
-│  (Comedy, Cartoons, Podcasts, Tutorials, Vlogs, Anything)       │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  1. DOWNLOAD                                                    │
-│     yt-dlp grabs the video automatically                        │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  2. TRANSCRIPT                                                  │
-│     Extracts word-level timestamps from subtitles               │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  3. AI ANALYSIS                                                 │
-│     ChatGPT finds funniest/best moments                         │
-│     (or local keyword scoring as fallback)                      │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  4. CUT & CONVERT                                               │
-│     MoviePy cuts clips → 1080x1920 vertical                     │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  OUTPUT: Ready-to-upload YouTube Shorts                         │
-└─────────────────────────────────────────────────────────────────┘
+Input Video → Transcript → AI Analysis → Cut Shorts → Output
 ```
 
 ---
 
-## 🎥 Demo
+## 🔄 Before & After
 
-### Preview
+![Before vs After](assets/screenshots/before_after.png)
 
-https://github.com/RootBugs/shorts-generator/blob/main/assets/preview.mp4
-
-> ⬆️ Generated shorts stitched together
-
-### GIF Preview
-
-![Demo](assets/demo.gif)
-
-> ⬆️ Sample output - 5 second clip
+| Input | Output |
+|:-----:|:------:|
+| ![Input](assets/input/sample_input.jpg) | ![Output](assets/output/sample_output.jpg) |
+| **8 min landscape video** | **5 × 30 sec vertical shorts** |
 
 ---
 
@@ -76,35 +40,16 @@ https://github.com/RootBugs/shorts-generator/blob/main/assets/preview.mp4
 
 ### Terminal Output
 
-```
-============================================================
-  SHORTS GENERATOR
-============================================================
+![Terminal](assets/screenshots/terminal.png)
 
-Video: Sample Video
-Duration: 502s (8.4 min)
-Size: 39.5 MB
+### Generated Shorts
 
-[1/3] Detecting scene changes...
-  Found 401 scene changes
-
-[2/3] Finding best moments...
-  Selected 4 clips:
-    1. 5s - 45s (40s)
-    2. 120s - 170s (50s)
-    3. 280s - 330s (50s)
-    4. 420s - 470s (50s)
-
-[3/3] Cutting shorts...
-  CREATED: short_01.mp4 (12.5 MB)
-  CREATED: short_02.mp4 (16.8 MB)
-  CREATED: short_03.mp4 (11.4 MB)
-  CREATED: short_04.mp4 (14.9 MB)
-
-============================================================
-  DONE! Generated 4 shorts
-============================================================
-```
+| # | Preview | Duration | Size |
+|---|---------|----------|------|
+| 1 | 🎬 | 40s | 12.5 MB |
+| 2 | 🎬 | 50s | 16.8 MB |
+| 3 | 🎬 | 50s | 11.4 MB |
+| 4 | 🎬 | 50s | 14.9 MB |
 
 ---
 
@@ -203,7 +148,10 @@ shorts-generator/
 ├── config.py           # Settings
 ├── main.py             # Menu
 ├── requirements.txt    # Dependencies
-├── assets/             # Demo GIFs/videos
+├── assets/             # Screenshots & demos
+│   ├── input/          # Input examples
+│   ├── output/         # Output examples
+│   └── screenshots/    # Process screenshots
 ├── output/             # Generated shorts
 └── temp/               # Temp files
 ```
