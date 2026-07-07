@@ -1,89 +1,65 @@
+import subprocess
 import os
+import json
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
-from moviepy import VideoFileClip
 
-
-def cut_clip(video_path: str, start: float, end: float, output_path: str) -> bool:
-    """Cut a clip from video using moviepy."""
+def get_ffmpeg():
+    """Get imageio's bundled ffmpeg."""
     try:
-        clip = VideoFileClip(video_path).subclipped(start, end)
-        clip.write_videofile(output_path, codec="libx264", audio_codec="aac", logger=None)
-        clip.close()
-        return os.path.exists(output_path)
-    except Exception as e:
-        print(f"Cut error: {e}")
-        return False
-
-
-def convert_to_shorts(input_path: str, output_path: str, width: int = 1080, height: int = 1920) -> bool:
-    """Convert video to vertical shorts format (9:16)."""
-    try:
-        clip = VideoFileClip(input_path)
-        
-        # Calculate crop and resize
-        w, h = clip.size
-        target_ratio = width / height
-        current_ratio = w / h
-        
-        if current_ratio > target_ratio:
-            # Video is wider, crop sides
-            new_w = int(h * target_ratio)
-            x_center = w / 2
-            clip = clip.cropped(x1=x_center - new_w/2, x2=x_center + new_w/2)
-        else:
-            # Video is taller, crop top/bottom
-            new_h = int(w / target_ratio)
-            y_center = h / 2
-            clip = clip.cropped(y1=y_center - new_h/2, y2=y_center + new_h/2)
-        
-        clip = clip.resized(width=width, height=height)
-        clip.write_videofile(output_path, codec="libx264", audio_codec="aac", logger=None)
-        clip.close()
-        return os.path.exists(output_path)
-    except Exception as e:
-        print(f"Resize error: {e}")
-        return False
-
-
-def create_short(video_path: str, start: float, end: float, 
-                 words: list, output_path: str) -> str | None:
-    """Full pipeline: cut → resize → output."""
-    temp_cut = output_path.replace(".mp4", "_cut.mp4")
-    
-    # Step 1: Cut clip
-    print(f"    Cutting {start:.1f}s - {end:.1f}s...")
-    if not cut_clip(video_path, start, end, temp_cut):
-        print("    Cut failed!")
-        return None
-    
-    # Step 2: Convert to shorts format
-    print(f"    Converting to shorts (1080x1920)...")
-    if not convert_to_shorts(temp_cut, output_path):
-        print("    Resize failed!")
-        return None
-    
-    # Cleanup
-    try:
-        os.remove(temp_cut)
+        from imageio_ffmpeg import get_ffmpeg_exe
+        return get_ffmpeg_exe()
     except:
-        pass
-    
-    return output_path
+        return "ffmpeg"
 
+def get_duration(video_path):
+    ffmpeg = get_ffmpeg()
+    ffprobe = ffmpeg.replace("ffmpeg.exe", "ffprobe.exe").replace("ffmpeg", "ffprobe")
+    if not os.path.exists(ffprobe):
+        ffprobe = "ffprobe"
+    cmd = [ffprobe, "-v", "quiet", "-print_format", "json", "-show_format", video_path]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+    if result.returncode == 0:
+        try:
+            return float(json.loads(result.stdout)["format"]["duration"])
+        except:
+            pass
+    return 0
+
+def cut_single(video_path, start, end, output_path):
+    """Cut clip using imageio's ffmpeg binary directly."""
+    ffmpeg = get_ffmpeg()
+    duration = end - start
+    
+    cmd = [
+        ffmpeg, "-y",
+        "-ss", str(start),
+        "-i", video_path,
+        "-t", str(duration),
+        "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "28",
+        "-c:a", "aac", "-b:a", "64k",
+        "-movflags", "+faststart", "-threads", "0",
+        output_path
+    ]
+    
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    return result.returncode == 0 and os.path.exists(output_path)
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python cutter.py <video> <start_sec> <end_sec> [output]")
+        print("Usage: python cutter.py <video> <start> <end> [output]")
         sys.exit(1)
-
+    
     video = sys.argv[1]
     start = float(sys.argv[2])
     end = float(sys.argv[3])
     output = sys.argv[4] if len(sys.argv) > 4 else "output_short.mp4"
-
-    result = create_short(video, start, end, [], output)
+    
+    print(f"FFmpeg: {get_ffmpeg()}")
+    result = cut_single(video, start, end, output)
     if result:
-        print(f"Created: {result}")
+        size = os.path.getsize(output) / 1024 / 1024
+        print(f"Created: {output} ({size:.1f} MB)")
     else:
         print("Failed!")
