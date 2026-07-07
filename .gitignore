@@ -7,3 +7,9 @@ __pycache__/
 *.info.json
 *.m4a
 chatgpt_cookies.json
+create_*.py
+find_*.py
+make_*.py
+run_*.py
+live_*.py
+*TEMP_MPY*
