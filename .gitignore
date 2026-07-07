@@ -1,0 +1,10 @@
+temp/
+output/
+generated/
+__pycache__/
+*.pyc
+*.mp4
+*.part
+*.info.json
+*.m4a
+chatgpt_cookies.json
