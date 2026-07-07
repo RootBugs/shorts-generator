@@ -7,7 +7,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 from datetime import datetime
 from config import YTDLP_PATH, INPUT_DIR, OUTPUT_DIR, TEMP_DIR, NUM_CLIPS
 from transcript import download_video, get_transcript_with_timestamps, words_to_segments
-from cutter import create_short, get_video_duration
+from cutter import create_short
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
